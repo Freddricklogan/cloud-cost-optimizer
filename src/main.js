@@ -1,7 +1,7 @@
 /** Wires FOCUS ingestion, the analytics and the recommendations to the page and the Executive Shell. */
 import { anomalies, dailySeries, forecastMonth, groupSum, monthOverMonth, monthlySeries, resourceSummary, totals } from './analysis.js';
 import { loadChartLib, makeCharts } from './charts.js';
-import { mountExecShell } from './exec-shell.js';
+import { mountExecShell, tokens } from './exec-shell.js';
 import { parseFocusCsv } from './focus.js';
 import { DEFAULT_ASSUMPTIONS, recommend, recommendationsCsv } from './recommend.js';
 import { $, el, setText } from './ui.js';
@@ -72,7 +72,7 @@ function render() {
   const months = monthlySeries(rows);
   charts.line($('monthChart'), months.map((m) => `${m.month}${m.days < 28 ? '*' : ''}`), [
     { label: 'Billed', data: months.map((m) => m.billed), fill: true },
-    ...(budget ? [{ label: 'Budget', data: months.map(() => budget), colour: '#f85149', dash: [6, 4], width: 1 }] : [])
+    ...(budget ? [{ label: 'Budget', data: months.map(() => budget), colour: tokens().danger, dash: [6, 4], width: 1 }] : [])
   ], 'Month (* partial)', 'USD');
   const daily = dailySeries(rows).slice(-90);
   charts.line($('dailyChart'), daily.map((d) => d.day.slice(5)), [{ label: 'Daily billed', data: daily.map((d) => d.billed) }], 'Day (last 90)', 'USD');
@@ -102,7 +102,7 @@ function render() {
     list.append(li);
   }
   const kinds = ['idle', 'rightsize', 'commit'];
-  charts.bars($('savingsChart'), ['Idle', 'Right-size', 'Commit (1-year)'], kinds.map((k) => state.items.filter((i) => i.kind === k).reduce((s, i) => s + i.monthlySaving, 0)), 'Identified monthly saving (USD)', '#3fb950');
+  charts.bars($('savingsChart'), ['Idle', 'Right-size', 'Commit (1-year)'], kinds.map((k) => state.items.filter((i) => i.kind === k).reduce((s, i) => s + i.monthlySaving, 0)), 'Identified monthly saving (USD)', tokens().ok);
 
   const warn = $('warnings');
   warn.replaceChildren();
@@ -153,6 +153,8 @@ async function boot() {
   $('export-json').addEventListener('click', () => download('summary.json', JSON.stringify({ source: state.source, forecast: state.forecast, assumptions: assumptions(), recommendations: state.items.map((i) => ({ ...i, resource: i.resource?.resourceId ?? null })) }, null, 2), 'application/json'));
 
   shell = mountExecShell({
+  theme: 'graphite',
+  accent: 'secondary',
     title: 'Cloud Cost Optimizer',
     tagline: 'FinOps analysis over a FOCUS 1.0 cost export: month-end projection from the daily trend, month-over-month on complete months, anomaly detection per service, idle and right-sizing candidates from utilisation, and commitment savings from assumptions you can edit. Upload your own FOCUS CSV; nothing leaves the browser.',
     repo: 'https://github.com/Freddricklogan/cloud-cost-optimizer',
