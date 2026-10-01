@@ -58,7 +58,7 @@ flowchart LR
   subgraph TB1["Trust Boundary: the browser (GitHub Pages, static)"]
     SAMPLE[("data/focus-sample.csv<br/>5,673 rows · 31 resources · 183 days")]:::data
     UPLOAD[("your FOCUS 1.0 CSV<br/>read locally")]:::data
-    subgraph PURE["Pure modules (21 tests, 100% stmts)"]
+    subgraph PURE["Pure modules (29 tests, 100% stmts)"]
       F["focus.js<br/>parse · validate · warn"]:::service
       A["analysis.js<br/>totals · monthly · forecast · MoM · anomalies · run rate"]:::service
       R["recommend.js<br/>idle · right-size · commit · egress · export"]:::service
